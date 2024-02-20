@@ -1,18 +1,40 @@
 import os
 import sys
+from typing import Dict, Tuple
+import torch
 from torchvision.datasets import (
     ImageNet,
-    Flowers102,
     Caltech101,
-    OxfordIIITPet,
+    DTD,
     EuroSAT,
+    FGVCAircraft,
+    Flowers102,
     Food101,
-    UCF101,
+    OxfordIIITPet,
     StanfordCars,
     SUN397,
-    DTD,
-    FGVCAircraft,
+    UCF101,
 )
+from torchvision.transforms import Compose, Lambda, ToPILImage
+from PIL import Image
+
+
+class ImageUCF101(UCF101):
+
+    def __init__(self, root: str, transform=None, **kwargs) -> None:
+        vid2img = Compose([Lambda(torch.squeeze), ToPILImage('RGB')])
+        transform = Compose([vid2img, transform]) if transform else vid2img
+        super().__init__(os.path.join(root, 'UCF-101'),
+                         os.path.join(root, 'ucfTrainTestlist'),
+                         frames_per_clip=1,
+                         transform=transform,
+                         num_workers=os.cpu_count(),
+                         output_format='TCHW',
+                         **kwargs)
+
+    def __getitem__(self, idx: int) -> Tuple[Image.Image, int]:
+        image, _, label = super().__getitem__(idx)
+        return image, label
 
 
 def load_test_dataset(name, transform=None):
@@ -22,7 +44,8 @@ def load_test_dataset(name, transform=None):
         print("export DATA_DIR=", file=sys.stderr)
         raise
     if name == 'imagenet':
-        return ImageNet(os.path.join(root, 'imagenet'), split='val', transform=transform)
+        path = os.path.join(root, 'imagenet')
+        return ImageNet(path, split='val', transform=transform)
     if name == 'caltech101':
         return Caltech101(root, transform=transform)
     if name == 'dtd':
@@ -42,6 +65,6 @@ def load_test_dataset(name, transform=None):
     if name == 'sun397':
         return SUN397(root, transform=transform)
     if name == 'ucf101':
-        # Next
-        return UCF101(root, )
+        path = os.path.join(root, 'ucf-101')
+        return ImageUCF101(path, train=False, transform=transform)
     raise NotImplementedError(name)
