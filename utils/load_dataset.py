@@ -43,28 +43,29 @@ def load_test_dataset(name, transform=None):
     except KeyError:
         print("export DATA_DIR=", file=sys.stderr)
         raise
-    if name == 'imagenet':
+    if name == 'ImageNet':
         path = os.path.join(root, 'imagenet')
         return ImageNet(path, split='val', transform=transform)
-    if name == 'caltech101':
+    if name == 'Caltech101':
         return Caltech101(root, transform=transform)
-    if name == 'dtd':
+    if name == 'DTD':
         return DTD(root, split='test', transform=transform)
-    if name == 'eurosat':
+    if name == 'EuroSAT':
         return EuroSAT(root, transform=transform)
-    if name == 'fgvcaircraft':
+    if name == 'FGVCAircraft':
         return FGVCAircraft(root, split='test', transform=transform)
-    if name == 'flowers102':
+    if name == 'Flowers102':
         return Flowers102(root, split='test', transform=transform)
-    if name == 'food101':
+    if name == 'Food101':
         return Food101(root, split='test', transform=transform)
-    if name == 'oxfordpets':
+    if name == 'OxfordPets':
         return OxfordIIITPet(root, split='test', transform=transform)
-    if name == 'stanfordcars':
+    if name == 'StanfordCars':
         return StanfordCars(root, split='test', transform=transform)
-    if name == 'sun397':
-        return SUN397(root, transform=transform)
-    if name == 'ucf101':
+    if name == 'SUN397':
+        path = os.path.join(root, 'SUN397')
+        return SUN397(path, transform=transform)
+    if name == 'UCF101':
         path = os.path.join(root, 'ucf-101')
         return ImageUCF101(path, train=False, transform=transform)
     raise NotImplementedError(name)
