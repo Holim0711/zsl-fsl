@@ -33,7 +33,7 @@ def test_inference(loader, model, zeroshot_weights):
 
 if __name__ == "__main__":
     model_name = sys.argv[1] if len(sys.argv) > 1 else 'RN50'
-    dataset_name = sys.argv[2] if len(sys.argv) > 2 else 'imagenet'
+    dataset_name = sys.argv[2] if len(sys.argv) > 2 else 'ImageNet'
     dataset_root = os.environ['TORCHVISION_DATASETS']
 
     # load model & dataset
