@@ -1,72 +1,72 @@
 - abbey
-- airplane_cabin
-- airport_terminal
+- airplane cabin
+- airport terminal
 - alley
 - amphitheater
-- amusement_arcade
-- amusement_park
-- anechoic_chamber
-- outdoor apartment_building
+- amusement arcade
+- amusement park
+- anechoic chamber
+- outdoor apartment building
 - indoor apse
 - aquarium
 - aqueduct
 - arch
 - archive
-- outdoor arrival_gate
-- art_gallery
-- art_school
-- art_studio
-- assembly_line
-- outdoor athletic_field
+- outdoor arrival gate
+- art gallery
+- art school
+- art studio
+- assembly line
+- outdoor athletic field
 - public atrium
 - attic
 - auditorium
-- auto_factory
+- auto factory
 - badlands
-- indoor badminton_court
-- baggage_claim
+- indoor badminton court
+- baggage claim
 - shop bakery
 - exterior balcony
 - interior balcony
-- ball_pit
+- ball pit
 - ballroom
-- bamboo_forest
-- banquet_hall
+- bamboo forest
+- banquet hall
 - bar
 - barn
 - barndoor
-- baseball_field
+- baseball field
 - basement
 - basilica
-- outdoor basketball_court
+- outdoor basketball court
 - bathroom
-- batters_box
+- batters box
 - bayou
 - indoor bazaar
 - outdoor bazaar
 - beach
-- beauty_salon
+- beauty salon
 - bedroom
 - berth
-- biology_laboratory
+- biology laboratory
 - indoor bistro
 - boardwalk
-- boat_deck
+- boat deck
 - boathouse
 - bookstore
 - indoor booth
-- botanical_garden
-- indoor bow_window
-- outdoor bow_window
-- bowling_alley
-- boxing_ring
+- botanical garden
+- indoor bow window
+- outdoor bow window
+- bowling alley
+- boxing ring
 - indoor brewery
 - bridge
-- building_facade
+- building facade
 - bullring
-- burial_chamber
-- bus_interior
-- butchers_shop
+- burial chamber
+- bus interior
+- butchers shop
 - butte
 - outdoor cabin
 - cafeteria
@@ -74,10 +74,10 @@
 - campus
 - natural canal
 - urban canal
-- candy_store
+- candy store
 - canyon
-- backseat car_interior
-- frontseat car_interior
+- backseat car interior
+- frontseat car interior
 - carrousel
 - indoor casino
 - castle
@@ -87,92 +87,92 @@
 - indoor cavern
 - cemetery
 - chalet
-- cheese_factory
-- chemistry_lab
-- indoor chicken_coop
-- outdoor chicken_coop
-- childs_room
+- cheese factory
+- chemistry lab
+- indoor chicken coop
+- outdoor chicken coop
+- childs room
 - indoor church
 - outdoor church
 - classroom
-- clean_room
+- clean room
 - cliff
 - indoor cloister
 - closet
-- clothing_store
+- clothing store
 - coast
 - cockpit
-- coffee_shop
-- computer_room
-- conference_center
-- conference_room
-- construction_site
-- control_room
-- outdoor control_tower
-- corn_field
+- coffee shop
+- computer room
+- conference center
+- conference room
+- construction site
+- control room
+- outdoor control tower
+- corn field
 - corral
 - corridor
-- cottage_garden
+- cottage garden
 - courthouse
 - courtroom
 - courtyard
-- exterior covered_bridge
+- exterior covered bridge
 - creek
 - crevasse
 - crosswalk
 - office cubicle
 - dam
 - delicatessen
-- dentists_office
+- dentists office
 - sand desert
 - vegetation desert
 - indoor diner
 - outdoor diner
 - home dinette
 - vehicle dinette
-- dining_car
-- dining_room
+- dining car
+- dining room
 - discotheque
 - dock
 - outdoor doorway
-- dorm_room
+- dorm room
 - driveway
-- outdoor driving_range
+- outdoor driving range
 - drugstore
-- electrical_substation
+- electrical substation
 - door elevator
 - interior elevator
-- elevator_shaft
-- engine_room
+- elevator shaft
+- engine room
 - indoor escalator
 - excavation
 - indoor factory
 - fairway
-- fastfood_restaurant
+- fastfood restaurant
 - cultivated field
 - wild field
-- fire_escape
-- fire_station
-- indoor firing_range
+- fire escape
+- fire station
+- indoor firing range
 - fishpond
-- indoor florist_shop
-- food_court
+- indoor florist shop
+- food court
 - broadleaf forest
 - needleleaf forest
-- forest_path
-- forest_road
-- formal_garden
+- forest path
+- forest road
+- formal garden
 - fountain
 - galley
-- game_room
+- game room
 - indoor garage
-- garbage_dump
-- gas_station
+- garbage dump
+- gas station
 - exterior gazebo
-- indoor general_store
-- outdoor general_store
-- gift_shop
-- golf_course
+- indoor general store
+- outdoor general store
+- gift shop
+- golf course
 - indoor greenhouse
 - outdoor greenhouse
 - indoor gymnasium
@@ -181,60 +181,60 @@
 - harbor
 - hayfield
 - heliport
-- herb_garden
+- herb garden
 - highway
 - hill
-- home_office
+- home office
 - hospital
-- hospital_room
-- hot_spring
-- outdoor hot_tub
+- hospital room
+- hot spring
+- outdoor hot tub
 - outdoor hotel
-- hotel_room
+- hotel room
 - house
-- outdoor hunting_lodge
-- ice_cream_parlor
-- ice_floe
-- ice_shelf
-- indoor ice_skating_rink
-- outdoor ice_skating_rink
+- outdoor hunting lodge
+- ice cream parlor
+- ice floe
+- ice shelf
+- indoor ice skating rink
+- outdoor ice skating rink
 - iceberg
 - igloo
-- industrial_area
+- industrial area
 - outdoor inn
 - islet
 - indoor jacuzzi
 - indoor jail
-- jail_cell
-- jewelry_shop
+- jail cell
+- jewelry shop
 - kasbah
 - indoor kennel
 - outdoor kennel
-- kindergarden_classroom
+- kindergarden classroom
 - kitchen
 - kitchenette
 - outdoor labyrinth
 - natural lake
 - landfill
-- landing_deck
+- landing deck
 - laundromat
-- lecture_room
+- lecture room
 - indoor library
 - outdoor library
-- outdoor lido_deck
-- lift_bridge
+- outdoor lido deck
+- lift bridge
 - lighthouse
-- limousine_interior
-- living_room
+- limousine interior
+- living room
 - lobby
-- lock_chamber
-- locker_room
+- lock chamber
+- locker room
 - mansion
-- manufactured_home
+- manufactured home
 - indoor market
 - outdoor market
 - marsh
-- martial_arts_gym
+- martial arts gym
 - mausoleum
 - medina
 - water moat
@@ -243,38 +243,38 @@
 - outdoor mosque
 - motel
 - mountain
-- mountain_snowy
-- indoor movie_theater
+- mountain snowy
+- indoor movie theater
 - indoor museum
-- music_store
-- music_studio
-- outdoor nuclear_power_plant
+- music store
+- music studio
+- outdoor nuclear power plant
 - nursery
-- oast_house
+- oast house
 - outdoor observatory
 - ocean
 - office
-- office_building
-- outdoor oil_refinery
+- office building
+- outdoor oil refinery
 - oilrig
-- operating_room
+- operating room
 - orchard
 - outdoor outhouse
 - pagoda
 - palace
 - pantry
 - park
-- indoor parking_garage
-- outdoor parking_garage
-- parking_lot
+- indoor parking garage
+- outdoor parking garage
+- parking lot
 - parlor
 - pasture
 - patio
 - pavilion
 - pharmacy
-- phone_booth
-- physics_laboratory
-- picnic_area
+- phone booth
+- physics laboratory
+- picnic area
 - indoor pilothouse
 - outdoor planetarium
 - playground
@@ -285,113 +285,113 @@
 - pond
 - establishment poolroom
 - home poolroom
-- outdoor power_plant
-- promenade_deck
+- outdoor power plant
+- promenade deck
 - indoor pub
 - pulpit
-- putting_green
+- putting green
 - racecourse
 - raceway
 - raft
-- railroad_track
+- railroad track
 - rainforest
 - reception
-- recreation_room
-- residential_neighborhood
+- recreation room
+- residential neighborhood
 - restaurant
-- restaurant_kitchen
-- restaurant_patio
-- rice_paddy
-- riding_arena
+- restaurant kitchen
+- restaurant patio
+- rice paddy
+- riding arena
 - river
-- rock_arch
-- rope_bridge
+- rock arch
+- rope bridge
 - ruin
 - runway
 - sandbar
 - sandbox
 - sauna
 - schoolhouse
-- sea_cliff
-- server_room
+- sea cliff
+- server room
 - shed
-- shoe_shop
+- shoe shop
 - shopfront
-- indoor shopping_mall
+- indoor shopping mall
 - shower
 - skatepark
-- ski_lodge
-- ski_resort
-- ski_slope
+- ski lodge
+- ski resort
+- ski slope
 - sky
 - skyscraper
 - slum
 - snowfield
-- squash_court
+- squash court
 - stable
 - baseball stadium
 - football stadium
 - indoor stage
 - staircase
 - street
-- subway_interior
-- platform subway_station
+- subway interior
+- platform subway station
 - supermarket
-- sushi_bar
+- sushi bar
 - swamp
-- indoor swimming_pool
-- outdoor swimming_pool
+- indoor swimming pool
+- outdoor swimming pool
 - indoor synagogue
 - outdoor synagogue
-- television_studio
-- east_asia temple
-- south_asia temple
-- indoor tennis_court
-- outdoor tennis_court
+- television studio
+- east asia temple
+- south asia temple
+- indoor tennis court
+- outdoor tennis court
 - outdoor tent
-- indoor_procenium theater
-- indoor_seats theater
+- indoor procenium theater
+- indoor seats theater
 - thriftshop
-- throne_room
-- ticket_booth
-- toll_plaza
-- topiary_garden
+- throne room
+- ticket booth
+- toll plaza
+- topiary garden
 - tower
 - toyshop
 - outdoor track
-- train_railway
-- platform train_station
-- tree_farm
-- tree_house
+- train railway
+- platform train station
+- tree farm
+- tree house
 - trench
-- coral_reef underwater
-- utility_room
+- coral reef underwater
+- utility room
 - valley
-- van_interior
-- vegetable_garden
+- van interior
+- vegetable garden
 - veranda
-- veterinarians_office
+- veterinarians office
 - viaduct
 - videostore
 - village
 - vineyard
 - volcano
-- indoor volleyball_court
-- outdoor volleyball_court
-- waiting_room
+- indoor volleyball court
+- outdoor volleyball court
+- waiting room
 - indoor warehouse
-- water_tower
+- water tower
 - block waterfall
 - fan waterfall
 - plunge waterfall
-- watering_hole
+- watering hole
 - wave
-- wet_bar
-- wheat_field
-- wind_farm
+- wet bar
+- wheat field
+- wind farm
 - windmill
-- barrel_storage wine_cellar
-- bottle_storage wine_cellar
-- indoor wrestling_ring
+- barrel storage wine cellar
+- bottle storage wine cellar
+- indoor wrestling ring
 - yard
-- youth_hostel
+- youth hostel
