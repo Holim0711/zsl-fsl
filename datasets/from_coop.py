@@ -2,12 +2,12 @@ import os
 import json
 from torch.utils.data import Dataset
 from PIL import Image
+from torchvision.datasets import ImageNet
 
 
 class SimpleDataset(Dataset):
-    def __init__(self, root, data, transform=None):
-        self.root = root
-        self.data = data
+    def __init__(self, root: str, data: list, transform=None):
+        self.data = [(os.path.join(root, x[0]), int(x[1])) for x in data]
         self.transform = transform
 
     def __len__(self):
@@ -15,7 +15,6 @@ class SimpleDataset(Dataset):
 
     def __getitem__(self, idx):
         x, y = self.data[idx]
-        x = os.path.join(self.root, x)
         x = Image.open(x).convert('RGB')
         if self.transform:
             x = self.transform(x)
@@ -27,27 +26,31 @@ class CoOpDatasets:
     IMAGE_DIR: str
     SPLIT_FILE: str
 
-    def __init__(self, root, num_shots=-1):
-        self.data_dir = os.path.join(root, self.DATA_DIR)
-        self.image_dir = os.path.join(self.data_dir, self.IMAGE_DIR)
-        self.split_file = os.path.join(self.data_dir, self.SPLIT_FILE)
+    @classmethod
+    def get_datasets(
+        cls,
+        root: str,
+        train_transform=None,
+        test_transform=None,
+    ):
+        # check data
+        data_dir = os.path.join(root, cls.DATA_DIR)
+        image_dir = os.path.join(data_dir, cls.IMAGE_DIR)
+        split_file = os.path.join(data_dir, cls.SPLIT_FILE)
+        assert os.path.isdir(data_dir), data_dir
+        assert os.path.isdir(image_dir), image_dir
+        assert os.path.isfile(split_file), split_file
 
         # read split_file [(image_path, class_index, class_name)]
-        split = json.load(open(self.split_file))
+        split = json.load(open(split_file))
         train, val, test = split['train'], split['val'], split['test']
 
-        # get classnames
-        mapping = {idx: name for _, idx, name in train + val + test}
-        self.classes = [mapping[i] for i in range(len(mapping))]
-
         # build datasets
-        self.train = SimpleDataset(self.image_dir, [x[:2] for x in train])
-        self.val = SimpleDataset(self.image_dir, [x[:2] for x in val])
-        self.test = SimpleDataset(self.image_dir, [x[:2] for x in test])
-
-        if num_shots > 0:
-            # TODO: train = self.generate_fewshot_dataset(train, num_shots=num_shots)
-            pass
+        return {
+            'train': SimpleDataset(image_dir, train, train_transform),
+            'val': SimpleDataset(image_dir, val, test_transform),
+            'test': SimpleDataset(image_dir, test, test_transform),
+        }
 
 
 class Caltech101(CoOpDatasets):
@@ -110,8 +113,20 @@ class UCF101(CoOpDatasets):
     SPLIT_FILE = 'split_zhou_UCF101.json'
 
 
-def build_dataset(dataset, root_path, shots):
-    return {
+def build_datasets(
+    name: str,
+    root: str,
+    train_transform=None,
+    test_transform=None,
+):
+    if name == 'ImageNet':
+        root = os.path.join(root, 'imagenet')
+        return {
+            'train': ImageNet(root, split='train', transform=train_transform),
+            'val': ImageNet(root, split='val', transform=test_transform),
+            'test': ImageNet(root, split='val', transform=test_transform),
+        }
+    cls = {
         "Caltech101": Caltech101,
         "DTD": DTD,
         "EuroSAT": EuroSAT,
@@ -122,4 +137,5 @@ def build_dataset(dataset, root_path, shots):
         "StanfordCars": StanfordCars,
         "SUN397": SUN397,
         "UCF101": UCF101,
-    }[dataset](root_path, shots)
+    }[name]
+    return cls.get_datasets(root, train_transform, test_transform)

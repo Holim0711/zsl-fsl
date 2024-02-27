@@ -1,6 +1,5 @@
 import os
-import sys
-from typing import Dict, Tuple
+from typing import Tuple
 import torch
 from torchvision.datasets import (
     ImageNet,
@@ -37,35 +36,83 @@ class ImageUCF101(UCF101):
         return image, label
 
 
-def load_test_dataset(name, transform=None):
-    try:
-        root = os.environ['DATA_DIR']
-    except KeyError:
-        print("export DATA_DIR=", file=sys.stderr)
-        raise
+def build_datasets(
+    name: str,
+    root: str,
+    train_transform=None,
+    test_transform=None,
+) -> dict:
+    cls = {
+        "ImageNet": ImageNet,
+        "Caltech101": Caltech101,
+        "DTD": DTD,
+        "EuroSAT": EuroSAT,
+        "FGVCAircraft": FGVCAircraft,
+        "Flowers102": Flowers102,
+        "Food101": Food101,
+        "OxfordPets": OxfordIIITPet,
+        "StanfordCars": StanfordCars,
+        "SUN397": SUN397,
+        "UCF101": ImageUCF101,
+    }[name]
+
     if name == 'ImageNet':
-        path = os.path.join(root, 'imagenet')
-        return ImageNet(path, split='val', transform=transform)
+        root = os.path.join(root, 'imagenet')
+        return {
+            'train': cls(root, split='train', transform=train_transform),
+            'val': cls(root, split='val', transform=test_transform),
+            'test': cls(root, split='val', transform=test_transform),
+        }
     if name == 'Caltech101':
-        return Caltech101(root, transform=transform)
+        return {
+            'test': cls(root, transform=test_transform),
+        }
     if name == 'DTD':
-        return DTD(root, split='test', transform=transform)
+        return {
+            'train': cls(root, split='train', transform=train_transform),
+            'val': cls(root, split='val', transform=test_transform),
+            'test': cls(root, split='test', transform=test_transform),
+        }
     if name == 'EuroSAT':
-        return EuroSAT(root, transform=transform)
+        return {
+            'test': cls(root, transform=test_transform),
+        }
     if name == 'FGVCAircraft':
-        return FGVCAircraft(root, split='test', transform=transform)
+        return {
+            'train': cls(root, split='train', transform=train_transform),
+            'val': cls(root, split='val', transform=test_transform),
+            'test': cls(root, split='test', transform=test_transform),
+        }
     if name == 'Flowers102':
-        return Flowers102(root, split='test', transform=transform)
+        return {
+            'train': cls(root, split='train', transform=train_transform),
+            'val': cls(root, split='val', transform=test_transform),
+            'test': cls(root, split='test', transform=test_transform),
+        }
     if name == 'Food101':
-        return Food101(root, split='test', transform=transform)
+        return {
+            'train': cls(root, split='train', transform=train_transform),
+            'test': cls(root, split='test', transform=test_transform),
+        }
     if name == 'OxfordPets':
-        return OxfordIIITPet(root, split='test', transform=transform)
+        return {
+            'train': cls(root, split='trainval', transform=train_transform),
+            'test': cls(root, split='test', transform=test_transform)
+        }
     if name == 'StanfordCars':
-        return StanfordCars(root, split='test', transform=transform)
+        return {
+            'train': cls(root, split='train', transform=train_transform),
+            'test': cls(root, split='test', transform=test_transform),
+        }
     if name == 'SUN397':
-        path = os.path.join(root, 'SUN397')
-        return SUN397(path, transform=transform)
+        root = os.path.join(root, 'SUN397')
+        return {
+            'test': cls(root, transform=test_transform),
+        }
     if name == 'UCF101':
-        path = os.path.join(root, 'ucf-101')
-        return ImageUCF101(path, train=False, transform=transform)
+        root = os.path.join(root, 'ucf-101')
+        return {
+            'train': cls(root, train=True, transform=train_transform),
+            'test': cls(root, train=False, transform=test_transform),
+        }
     raise NotImplementedError(name)

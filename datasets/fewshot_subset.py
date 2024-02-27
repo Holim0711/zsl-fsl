@@ -1,6 +1,7 @@
 from torch.utils.data import Dataset, Subset
 from torchvision.datasets import ImageNet, CIFAR10, CIFAR100, MNIST, SVHN
 from random import Random
+from typing import Optional
 
 
 class FewShotSubset(Subset):
@@ -8,7 +9,7 @@ class FewShotSubset(Subset):
         self,
         dataset: Dataset,
         k_shots: int,
-        random_seed: int = 0,
+        random_seed: Optional[int] = None,
     ):
         if isinstance(dataset, (ImageNet, CIFAR10, CIFAR100)):
             targets = dataset.targets
