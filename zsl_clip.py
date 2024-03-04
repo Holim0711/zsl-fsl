@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 import clip
 from tqdm import tqdm
-from utils import zeroshot_classifier
+from utils import prompt_ensembler
 from datasets import build_coop_datasets
 import yaml
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     templates = yaml.safe_load(open(os.path.join(class_path, 'templates.yaml')))
 
     # build classifier
-    zeroshot_weights = zeroshot_classifier(model, classes, templates)
+    zeroshot_weights = prompt_ensembler(model, classes, templates)
 
     # run test
     acc = run_test(loader, model, zeroshot_weights)
