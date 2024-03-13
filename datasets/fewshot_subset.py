@@ -2,6 +2,7 @@ from torch.utils.data import Dataset, Subset
 from torchvision.datasets import ImageNet, CIFAR10, CIFAR100, MNIST, SVHN
 from random import Random
 from typing import Optional
+from .from_coop import SimpleDataset
 
 
 class FewShotSubset(Subset):
@@ -15,6 +16,8 @@ class FewShotSubset(Subset):
             targets = dataset.targets
         elif isinstance(dataset, (MNIST, SVHN)):
             targets = dataset.targets.tolist()
+        elif isinstance(dataset, SimpleDataset):
+            targets = [y for _, y in dataset.data]
         else:
             targets = [y for _, y in dataset]
         index_lists = [[] for _ in range(max(targets) + 1)]
