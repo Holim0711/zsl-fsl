@@ -132,6 +132,6 @@ if __name__ == "__main__":
                 html = show_attention(token, avg_weight)
                 for w in weight:
                     html += show_attention(token, w)
-                with open(f'qqq-{i}.html', 'w') as f:
+                with open(f'results/amap/txt/qqq-{i}.html', 'w') as f:
                     print(html, file=f)
             exit()

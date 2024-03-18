@@ -197,4 +197,4 @@ if __name__ == "__main__":
             v2 = F.normalize(v2)
             w = w.squeeze()
             w[:, -1] = 0  # only for CLIP RN50
-            show_attention(x, w[:, 1:], f'results/amap/{i:02d}.png')
+            show_attention(x, w[:, 1:], f'results/amap/img/{i:02d}.png')
