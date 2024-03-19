@@ -63,7 +63,24 @@ class CustomResidualAttentionBlock(clip.model.ResidualAttentionBlock):
         return x, w
 
 
-# class CustomTransformer(clip.model.Transformer):
+class CustomTransformer(clip.model.Transformer):
+
+    def __init__(self, model: clip.model.Transformer):
+        torch.nn.Module.__init__(self)
+        self.width = model.width
+        self.layers = model.layers
+        self.resblocks = torch.nn.Sequential(*[
+            CustomResidualAttentionBlock(block) for block in model.resblocks
+        ])
+
+    def forward(self, x: torch.Tensor):
+        W = []
+        for block in self.resblocks:
+            x, w = block(x)
+            W.append(w)
+        return x, torch.stack(W, dim=1)
+
+
 # class CustomVisionTransformer(clip.model.VisionTransformer):
 
 
@@ -90,9 +107,10 @@ class CustomCLIP(clip.model.CLIP):
             raise Exception("Unknown CLIP Visual Encoder Structure")
 
         # Language Encoder
-        last_layer = self.transformer.resblocks.pop(-1)
-        last_layer = CustomResidualAttentionBlock(last_layer)
-        self.transformer.resblocks.append(last_layer)
+        self.transformer = CustomTransformer(self.transformer)
+        # last_layer = self.transformer.resblocks.pop(-1)
+        # last_layer = CustomResidualAttentionBlock(last_layer)
+        # self.transformer.resblocks.append(last_layer)
 
     def encode_text(self, text):
         x = self.token_embedding(text).type(self.dtype)  # [batch_size, n_ctx, d_model]

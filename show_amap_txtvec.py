@@ -40,6 +40,14 @@ def show_attention(tokens, weights):
     return '<div>' + ''.join(html) + '</div>'
 
 
+def accumulate_attention(w: torch.Tensor, α: float = 0.5):
+    # (n_layers, n_heads, n_tokens, n_tokens) → (n_tokens, n_tokens)
+    w = w.mean(dim=1)
+    w = (1 - α) * w + α * torch.eye(w.shape[-1], device=w.device)
+    w = torch.linalg.multi_dot(tuple(w.flip(dims=[0])))
+    return w
+
+
 if __name__ == "__main__":
     model_name = sys.argv[1] if len(sys.argv) > 1 else 'RN50'
     dataset_name = sys.argv[2] if len(sys.argv) > 2 else 'ImageNet'
@@ -68,16 +76,18 @@ if __name__ == "__main__":
             tokens = clip.tokenize(texts).cuda()
             vecs, weights = model.encode_text(tokens)
             for i, (token, vec, weight) in enumerate(zip(tokens, vecs, weights)):
-                print('-------------------')
                 end = token.argmax()
                 token = token[1:end]
-                weight = weight[:, end, 1:end]
                 token = [decoder.decode([t.item()]) for t in token]
-                avg_weight = weight.mean(dim=0)
-                
-                html = show_attention(token, avg_weight)
-                for w in weight:
-                    html += show_attention(token, w)
+                weight = weight[:, :, :end+1, :end+1]
+                weight = accumulate_attention(weight.to(torch.float32))
+                weight = weight[end, 1:end]
+                print('--------------------')
+                print(token)
+                print(weight)
+                html = show_attention(token, weight)
+                #for w in weight:
+                #    html += show_attention(token, w)
                 with open(f'results/amap/txt/qqq-{i}.html', 'w') as f:
                     print(html, file=f)
             exit()
