@@ -3,12 +3,11 @@ import sys
 import torch
 import torch.nn.functional as F
 import clip
-from datasets import build_coop_datasets
-import json
-import random
-
 import matplotlib.pyplot as plt
 import math
+
+from datasets import build_coop_datasets
+from utils import CustomCLIP
 
 
 def my_mha_just_for_check(
@@ -75,77 +74,6 @@ def my_mha_just_for_check(
         return attn_output, None
 
 
-class AttViewerAttentionPool2d(clip.model.AttentionPool2d):
-
-    def __init__(self, model: clip.model.AttentionPool2d):
-        n_pos, embed_dim = model.positional_embedding.shape
-        spacial_dim = int((n_pos - 1) ** 0.5)
-        num_heads = model.num_heads
-        output_dim = model.c_proj.out_features
-        super().__init__(spacial_dim, embed_dim, num_heads, output_dim)
-        clip.model.convert_weights(self)
-        self.load_state_dict(model.state_dict())
-        self.to(next(model.parameters()).device)
-
-    def forward(self, x):
-        x = x.flatten(start_dim=2).permute(2, 0, 1)  # NCHW -> (HW)NC
-        x = torch.cat([x.mean(dim=0, keepdim=True), x], dim=0)  # (HW+1)NC
-        x = x + self.positional_embedding[:, None, :].to(x.dtype)  # (HW+1)NC
-        x, attention_weights = F.multi_head_attention_forward(
-            query=x[:1], key=x, value=x,
-            embed_dim_to_check=x.shape[-1],
-            num_heads=self.num_heads,
-            q_proj_weight=self.q_proj.weight,
-            k_proj_weight=self.k_proj.weight,
-            v_proj_weight=self.v_proj.weight,
-            in_proj_weight=None,
-            in_proj_bias=torch.cat([self.q_proj.bias, self.k_proj.bias, self.v_proj.bias]),
-            bias_k=None,
-            bias_v=None,
-            add_zero_attn=False,
-            dropout_p=0,
-            out_proj_weight=self.c_proj.weight,
-            out_proj_bias=self.c_proj.bias,
-            use_separate_proj_weight=True,
-            training=self.training,
-            # need_weights=False,
-            need_weights=True,
-            average_attn_weights=False
-        )
-        return x.squeeze(0), attention_weights
-
-
-class AttViewerModifiedResNet(clip.model.ModifiedResNet):
-    pass
-
-
-class AttViewerCLIP(clip.model.CLIP):
-    pass
-
-
-def get_list_of_texts(classes):
-    list_of_texts = []
-    for i, c in enumerate(classes):
-        c = c.replace(' ', '_').replace('/', '_')
-        filename = f'data/Desc/FGVCAircraft/description/{i:03d}.{c}.txt'
-        texts = [x.strip() for x in open(filename)]
-        texts = [x.split(':', maxsplit=1)[1].strip() for x in texts]
-        list_of_texts.append(texts)
-    return list_of_texts
-
-
-def get_list_of_texts_CuPL(classes, method='base', rand_k=None):
-    if method == 'base':
-        data = json.load(open('data/CuPL/base/airplane_prompts_base.json'))
-    elif method == 'full':
-        data = json.load(open('data/CuPL/full/airplane_prompts_full.json'))
-    list_of_texts = [data[c] for c in classes]
-    if rand_k:
-        state = random.Random(0)
-        list_of_texts = [state.sample(v, rand_k) for v in list_of_texts]
-    return list_of_texts
-
-
 def show_attention(image_tensor, attention_maps, title):
     image_tensor = image_tensor.cpu()
     attention_maps = attention_maps.cpu()
@@ -185,16 +113,14 @@ if __name__ == "__main__":
 
     # load model & dataset
     model, preprocess = clip.load(model_name)
-    datasets = build_coop_datasets(dataset_name, dataset_root, preprocess, preprocess)
-
-    model.visual.attnpool = AttViewerAttentionPool2d(model.visual.attnpool)
+    model = CustomCLIP(model)
+    datasets = build_coop_datasets(dataset_name, dataset_root)
 
     with torch.no_grad():
         for i in [0, 1, 2, 3, 4]:
             x, y = datasets['test'][i]
-            x = x.unsqueeze(0).cuda()
-            v2, w = model.encode_image(x)
-            v2 = F.normalize(v2)
-            w = w.squeeze()
+            x = preprocess(x).unsqueeze(0).cuda()
+            v, w = model.encode_image(x)
+            w = w[0, :, 0, :]
             w[:, -1] = 0  # only for CLIP RN50
             show_attention(x, w[:, 1:], f'results/amap/img/{i:02d}.png')

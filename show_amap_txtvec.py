@@ -5,61 +5,7 @@ import clip
 import json
 import random
 import yaml
-import matplotlib.pyplot as plt
-
-
-class AttViewerResidualAttentionBlock(clip.model.ResidualAttentionBlock):
-    def __init__(self, model: clip.model.ResidualAttentionBlock):
-        d_model = model.attn.embed_dim
-        n_head = model.attn.num_heads
-        attn_mask = model.attn_mask
-        super().__init__(d_model, n_head, attn_mask)
-        clip.model.convert_weights(self)
-        self.load_state_dict(model.state_dict())
-        self.to(next(model.parameters()).device)
-
-    def attention(self, x: torch.Tensor):
-        self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
-        return self.attn(x, x, x, need_weights=True, average_attn_weights=False, attn_mask=self.attn_mask)
-
-    def forward(self, x: torch.Tensor):
-        a, w = self.attention(self.ln_1(x))
-        x = x + a
-        x = x + self.mlp(self.ln_2(x))
-        return x, w
-
-
-class AttViewerCLIP(clip.model.CLIP):
-    def __init__(self, model: clip.model.CLIP):
-        torch.nn.Module.__init__(self)
-        self.context_length = model.context_length
-        self.visual = model.visual
-        self.transformer = model.transformer
-        self.vocab_size = model.vocab_size
-        self.token_embedding = model.token_embedding
-        self.positional_embedding = model.positional_embedding
-        self.ln_final = model.ln_final
-        self.text_projection = model.text_projection
-        self.logit_scale = model.logit_scale
-        
-        last_layer = self.transformer.resblocks.pop(-1)
-        last_layer = AttViewerResidualAttentionBlock(last_layer)
-        self.transformer.resblocks.append(last_layer)
-
-    def encode_text(self, text):
-        x = self.token_embedding(text).type(self.dtype)  # [batch_size, n_ctx, d_model]
-
-        x = x + self.positional_embedding.type(self.dtype)
-        x = x.permute(1, 0, 2)  # NLD -> LND
-        x, w = self.transformer(x)
-        x = x.permute(1, 0, 2)  # LND -> NLD
-        x = self.ln_final(x).type(self.dtype)
-
-        # x.shape = [batch_size, n_ctx, transformer.width]
-        # take features from the eot embedding (eot_token is the highest number in each sequence)
-        x = x[torch.arange(x.shape[0]), text.argmax(dim=-1)] @ self.text_projection
-
-        return x, w
+from utils import CustomCLIP
 
 
 def get_list_of_texts(classes):
@@ -101,7 +47,7 @@ if __name__ == "__main__":
 
     # load model & dataset
     model, preprocess = clip.load(model_name)
-    model = AttViewerCLIP(model)
+    model = CustomCLIP(model)
 
     # load classes & templates
     class_path = os.path.join('data', 'CoOp', dataset_name)
