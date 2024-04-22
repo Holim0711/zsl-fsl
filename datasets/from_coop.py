@@ -15,7 +15,7 @@ class SimpleDataset(Dataset):
 
     def __getitem__(self, idx):
         x, y = self.data[idx]
-        x = Image.open(x).convert('RGB')
+        x = Image.open(x)
         if self.transform:
             x = self.transform(x)
         return x, y
