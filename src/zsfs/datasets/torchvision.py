@@ -18,7 +18,7 @@ from torchvision.transforms import Compose, Lambda, ToPILImage
 from PIL import Image
 
 
-class ImageUCF101(UCF101):
+class UCF101MidFrames(UCF101):
 
     def __init__(self, root: str, transform=None, **kwargs) -> None:
         vid2img = Compose([Lambda(torch.squeeze), ToPILImage('RGB')])
@@ -30,18 +30,29 @@ class ImageUCF101(UCF101):
                          num_workers=os.cpu_count(),
                          output_format='TCHW',
                          **kwargs)
+        self.clip_len = [
+            len(x) for x in self.video_clips.metadata['video_pts']]
+        self.clip_start_index = [
+            sum(self.clip_len[:i]) for i in range(len(self.clip_len))]
+
+    def __len__(self):
+        return len(self.clip_start_index)
 
     def __getitem__(self, idx: int) -> Tuple[Image.Image, int]:
-        image, _, label = super().__getitem__(idx)
+        clip_start_index = self.clip_start_index[idx]
+        clip_mid_index = clip_start_index + self.clip_len[idx] // 2
+        image, _, label = super().__getitem__(clip_mid_index)
         return image, label
 
 
 def build_datasets(
     name: str,
-    root: str,
     train_transform=None,
     test_transform=None,
 ) -> dict:
+    # get environment variable
+    root = os.environ['TORCHVISION_DATASETS']
+
     cls = {
         "ImageNet": ImageNet,
         "Caltech101": Caltech101,
@@ -53,7 +64,7 @@ def build_datasets(
         "OxfordPets": OxfordIIITPet,
         "StanfordCars": StanfordCars,
         "SUN397": SUN397,
-        "UCF101": ImageUCF101,
+        "UCF101": UCF101MidFrames,
     }[name]
 
     if name == 'ImageNet':

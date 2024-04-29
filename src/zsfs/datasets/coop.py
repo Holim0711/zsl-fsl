@@ -115,10 +115,12 @@ class UCF101(CoOpDatasets):
 
 def build_datasets(
     name: str,
-    root: str,
     train_transform=None,
     test_transform=None,
 ):
+    # get environment variable
+    root = os.environ['TORCHVISION_DATASETS']
+
     if name == 'ImageNet':
         root = os.path.join(root, 'imagenet')
         return {
