@@ -18,6 +18,7 @@ class CustomAttentionPool2d(clip.model.AttentionPool2d):
         x = x.flatten(start_dim=2).permute(2, 0, 1)  # NCHW -> (HW)NC
         x = torch.cat([x.mean(dim=0, keepdim=True), x], dim=0)  # (HW+1)NC
         x = x + self.positional_embedding[:, None, :].to(x.dtype)  # (HW+1)NC
+        z = x
         x, attention_weights = F.multi_head_attention_forward(
             query=x, key=x, value=x,
             embed_dim_to_check=x.shape[-1],
@@ -39,7 +40,9 @@ class CustomAttentionPool2d(clip.model.AttentionPool2d):
             need_weights=True,
             average_attn_weights=False
         )
-        return x, attention_weights
+        z = self.v_proj(z)
+        z = self.c_proj(z)
+        return x, attention_weights, z
 
 
 class CustomResidualAttentionBlock(clip.model.ResidualAttentionBlock):
@@ -81,7 +84,39 @@ class CustomTransformer(clip.model.Transformer):
         return x, torch.stack(W, dim=1)
 
 
-# class CustomVisionTransformer(clip.model.VisionTransformer):
+class CustomVisionTransformer(clip.model.VisionTransformer):
+    def __init__(self, model: clip.model.VisionTransformer):
+        torch.nn.Module.__init__(self)
+        self.input_resolution = model.input_resolution
+        self.output_dim = model.output_dim
+        self.conv1 = model.conv1
+        self.class_embedding = model.class_embedding
+        self.positional_embedding = model.positional_embedding
+        self.ln_pre = model.ln_pre
+        self.transformer = CustomTransformer(model.transformer)
+        # self.transformer.resblocks.pop(-1)  ###########################################
+        self.ln_post = model.ln_post
+        self.proj = model.proj
+
+    def forward(self, x: torch.Tensor):
+        x = self.conv1(x)  # shape = [*, width, grid, grid]
+        x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
+        x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]
+        x = torch.cat([self.class_embedding.to(x.dtype) + torch.zeros(x.shape[0], 1, x.shape[-1], dtype=x.dtype, device=x.device), x], dim=1)  # shape = [*, grid ** 2 + 1, width]
+        x = x + self.positional_embedding.to(x.dtype)
+        x = self.ln_pre(x)
+
+        x = x.permute(1, 0, 2)  # NLD -> LND
+        x, W = self.transformer(x)
+        x = x.permute(1, 0, 2)  # LND -> NLD
+
+        # x = self.ln_post(x[:, 0, :])
+        x = self.ln_post(x)
+
+        if self.proj is not None:
+            x = x @ self.proj
+
+        return x, W
 
 
 class CustomCLIP(clip.model.CLIP):
@@ -102,7 +137,7 @@ class CustomCLIP(clip.model.CLIP):
         if isinstance(self.visual, clip.model.ModifiedResNet):
             self.visual.attnpool = CustomAttentionPool2d(self.visual.attnpool)
         elif isinstance(self.visual, clip.model.VisionTransformer):
-            raise NotImplementedError()
+            self.visual = CustomVisionTransformer(self.visual)
         else:
             raise Exception("Unknown CLIP Visual Encoder Structure")
 
