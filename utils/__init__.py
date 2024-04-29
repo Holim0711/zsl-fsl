@@ -1,2 +1,6 @@
-from .zeroshot_classifier import prompt_ensembler, encode_list_of_texts
+from .zeroshot_classifier import (
+    encode_prompts,
+    MeanEnsembler,
+    MaxEnsembler,
+)
 from .custom_clip import CustomCLIP

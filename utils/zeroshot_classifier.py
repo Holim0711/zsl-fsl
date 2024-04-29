@@ -1,47 +1,64 @@
 import os
-from hashlib import md5
-from tqdm import tqdm
+import hashlib
 import torch
-import clip
+from clip.model import CLIP
+from clip import tokenize
 
 
-@torch.no_grad
-def _encode_list_of_texts(
-    model: clip.model.CLIP,
-    list_of_texts: list[list[str]],
-):
-    list_of_embeddings = []
-    for texts in tqdm(list_of_texts):
-        tokens = clip.tokenize(texts).cuda()
-        embeddings = model.encode_text(tokens)
-        list_of_embeddings.append(embeddings)
-    return list_of_embeddings
+def encode_texts(model: CLIP, texts: list[str]):
+    x = tokenize(texts).cuda()
+    x = model.encode_text(x)
+    x = torch.nn.functional.normalize(x)
+    return x
 
 
-def encode_list_of_texts(
-    model: clip.model.CLIP,
-    list_of_texts: list[list[str]],
-    cache_dir: str,
-):
-    hash_str = str(model) + '\n' + str(list_of_texts)
-    hash_val = md5(hash_str.encode()).hexdigest()
-    cache_file = os.path.join(cache_dir, hash_val) + '.pt'
-    if not os.path.isfile(cache_file):
-        list_of_embeddings = _encode_list_of_texts(model, list_of_texts)
-        torch.save(list_of_embeddings, cache_file)
-    return torch.load(cache_file)
+def encode_texts_cached(model: CLIP, texts: list[str], cache_dir: str):
+    hash = hashlib.md5((str(model) + '\n' + str(texts)).encode()).hexdigest()
+    cache = os.path.join(cache_dir, hash) + '.pt'
+    if not os.path.isfile(cache):
+        x = encode_texts(model, texts)
+        torch.save(x, cache)
+    return torch.load(cache)
 
 
-def prompt_ensembler(
-    model: clip.model.CLIP,
-    classes: list,
-    templates: list,
+def encode_prompts(
+    model: CLIP,
+    prompts: list[list[str]],
     cache_dir: str = '.cache',
 ):
-    list_of_texts = [[t.format(c) for t in templates] for c in classes]
-    list_of_embeddings = encode_list_of_texts(model, list_of_texts, cache_dir)
-    list_of_embeddings = [torch.nn.functional.normalize(x) for x in list_of_embeddings]
-    embeddings = [x.mean(dim=0) for x in list_of_embeddings]
-    embeddings = torch.stack(embeddings, dim=1)
-    embeddings = torch.nn.functional.normalize(embeddings, dim=0)
-    return embeddings   # (dim x n_classes)
+    return [encode_texts_cached(model, x, cache_dir) for x in prompts]
+
+
+class MeanEnsembler(torch.nn.Linear):
+    def __init__(self, weights: list[torch.Tensor]):
+        weights = torch.stack([x.mean(dim=0) for x in weights])
+        weights = torch.nn.functional.normalize(weights)
+        out_features, in_features = weights.shape
+        super().__init__(
+            in_features,
+            out_features,
+            bias=False,
+            device=weights.device,
+            dtype=weights.dtype,
+        )
+        self.weight.data = weights
+
+
+class MaxEnsembler(torch.nn.Module):
+    def __init__(self, weights: list[torch.Tensor]):
+        super().__init__()
+        self.weights = torch.nn.Parameter(torch.cat(weights))
+        self.indices = torch.tensor([
+            i for i, x in enumerate(weights) for _ in range(len(x))
+        ])
+        self.register_buffer('indices', self.indices)
+        self.n_classes = torch.tensor(len(weights))
+        self.register_buffer('n_classes', self.n_classes)
+
+    def forward(self, x):
+        x = torch.nn.functional.normalize(x)
+        x = x @ self.weights.t()
+        z = torch.full((self.n_classes,), float('-inf'),
+                       dtype=x.dtype, device=x.device)
+        z = z.scatter_reduce_(0, self.indices, x, reduce='amax')
+        return z
