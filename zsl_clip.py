@@ -77,15 +77,6 @@ if __name__ == "__main__":
     # load classes & templates
     prompts = get_prompts(method_name, dataset_name)
 
-    # special treatment for Caltech101
-    # - torchvision: 101 classes ('Face', 'Face_easy', 'leopard', ...)
-    # - coop: 100 classes ('Face', 'leopard', ...)
-    if dataset_name == 'Caltech101':
-        if dataset_module.lower() == 'torchvision' and len(prompts) == 100:
-            prompts.insert(0, prompts[0])   # copy 'Face' to 'Face_easy'
-        elif dataset_module.lower() == 'coop' and len(prompts) == 101:
-            prompts.pop(1)                  # remove 'Face_easy'
-
     # build classifier
     zeroshot_classifier = MeanEnsembler(encode_prompts(model, prompts))
 

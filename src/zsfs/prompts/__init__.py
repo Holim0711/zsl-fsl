@@ -55,22 +55,33 @@ def get_classes(method: str, dataset: str):
         raise ValueError(f'Unknown method: {method}')
 
 
-def get_prompts(method: str, dataset: str):
+def get_prompts(method: str, dataset_module: str, dataset_name: str):
     if method == 'CLIP':
-        classes = get_classes(method, dataset)
-        templates = read_yaml_in_module(CLIP, dataset, 'templates.yaml')
-        return [[t.format(c) for t in templates] for c in classes]
+        classes = get_classes(method, dataset_name)
+        templates = read_yaml_in_module(CLIP, dataset_name, 'templates.yaml')
+        prompts = [[t.format(c) for t in templates] for c in classes]
     elif method == 'CoOp':
-        classes = get_classes(method, dataset)
-        templates = read_yaml_in_module(CoOp, dataset, 'templates.yaml')
-        return [[t.format(c) for t in templates] for c in classes]
+        classes = get_classes(method, dataset_name)
+        templates = read_yaml_in_module(CoOp, dataset_name, 'templates.yaml')
+        prompts = [[t.format(c) for t in templates] for c in classes]
     elif method == 'CuPL.base':
-        classes = get_classes(method, dataset)
-        prompts = read_cupl_prmopts(dataset, 'base')
-        return [prompts[c] for c in classes]
+        classes = get_classes(method, dataset_name)
+        prompts = read_cupl_prmopts(dataset_name, 'base')
+        prompts = [prompts[c] for c in classes]
     elif method == 'CuPL.full':
-        classes = get_classes(method, dataset)
-        prompts = read_cupl_prmopts(dataset, 'full')
-        return [prompts[c] for c in classes]
+        classes = get_classes(method, dataset_name)
+        prompts = read_cupl_prmopts(dataset_name, 'full')
+        prompts = [prompts[c] for c in classes]
     else:
         raise ValueError(f'Unknown method: {method}')
+
+    # special treatment for CoOp.Caltech101
+    # - Original: 101 classes ('Face', 'Face_easy', ...)
+    # - CoOp: 100 classes ('Face', ...)
+    if dataset_name == 'Caltech101':
+        if dataset_module.lower() == 'coop' and len(prompts) == 101:
+            prompts.pop(1)                  # remove 'Face_easy'
+        if dataset_module.lower() != 'coop' and len(prompts) == 100:
+            prompts.insert(0, prompts[0])   # copy 'Face' to 'Face_easy'
+
+    return prompts
