@@ -75,7 +75,7 @@ if __name__ == "__main__":
     loader = torch.utils.data.DataLoader(datasets['test'], batch_size=64, num_workers=os.cpu_count(), pin_memory=True)
 
     # load classes & templates
-    prompts = get_prompts(method_name, dataset_name)
+    prompts = get_prompts(method_name, dataset_module, dataset_name)
 
     # build classifier
     zeroshot_classifier = MeanEnsembler(encode_prompts(model, prompts))
