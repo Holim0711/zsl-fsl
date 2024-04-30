@@ -46,3 +46,4 @@ class FewShotSubset(Subset):
         rand = Random(random_seed)
         index_lists = [rand.sample(x, k_shots) for x in index_lists]
         super().__init__(dataset, sum(index_lists, []))
+        self.targets = [targets[i] for i in self.indices]

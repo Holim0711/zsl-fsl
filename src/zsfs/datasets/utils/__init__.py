@@ -1,1 +1,1 @@
-from .fewshot_subset import FewShotSubset
+from .fewshot_subset import get_targets, FewShotSubset
