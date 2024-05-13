@@ -4,3 +4,4 @@ from .zeroshot_classifier import (
     MaxEnsembler,
 )
 from .custom_clip import CustomCLIP
+from .clip_fp32 import load_clip_fp32
