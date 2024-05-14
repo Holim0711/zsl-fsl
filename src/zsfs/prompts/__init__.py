@@ -55,14 +55,23 @@ def get_classes(method: str, dataset: str):
         raise ValueError(f'Unknown method: {method}')
 
 
+def get_templates(method: str, dataset: str):
+    if method == 'CLIP':
+        return read_yaml_in_module(CLIP, dataset, 'templates.yaml')
+    elif method == 'CoOp':
+        return read_yaml_in_module(CoOp, dataset, 'templates.yaml')
+    else:
+        raise ValueError(f'Unknown method: {method}')
+
+
 def get_prompts(method: str, dataset_module: str, dataset_name: str):
     if method == 'CLIP':
         classes = get_classes(method, dataset_name)
-        templates = read_yaml_in_module(CLIP, dataset_name, 'templates.yaml')
+        templates = get_templates(method, dataset_name)
         prompts = [[t.format(c) for t in templates] for c in classes]
     elif method == 'CoOp':
         classes = get_classes(method, dataset_name)
-        templates = read_yaml_in_module(CoOp, dataset_name, 'templates.yaml')
+        templates = get_templates(method, dataset_name)
         prompts = [[t.format(c) for t in templates] for c in classes]
     elif method == 'CuPL.base':
         classes = get_classes(method, dataset_name)
