@@ -34,7 +34,7 @@ def read_cupl_prmopts(dataset: str, base_or_full: str):
         'Food101': 'food',
         'ImageNet': 'imagenet',
         'Kinetics700': 'kinetics',
-        'OxfordPets': 'pets',
+        'OxfordIIITPet': 'pets',
         'RESISC45': 'res45',
         'SUN397': 'sun',
         'DTD': 'texture',
