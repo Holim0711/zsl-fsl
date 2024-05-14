@@ -1,5 +1,5 @@
 import os
-from typing import Tuple
+from typing import Tuple, Optional, Callable
 import torch
 from torchvision.datasets import (
     ImageNet,
@@ -14,22 +14,27 @@ from torchvision.datasets import (
     SUN397,
     UCF101,
 )
-from torchvision.transforms import Compose, Lambda, ToPILImage
+from torchvision.transforms import Compose, ToPILImage
 from PIL import Image
 
 
 class UCF101MidFrames(UCF101):
 
-    def __init__(self, root: str, transform=None, **kwargs) -> None:
-        vid2img = Compose([Lambda(torch.squeeze), ToPILImage('RGB')])
-        transform = Compose([vid2img, transform]) if transform else vid2img
+    def __init__(
+        self,
+        root: str,
+        split: str,
+        transform: Optional[Callable] = None,
+    ):
+        to_image = Compose([torch.squeeze, ToPILImage('RGB')])
+        transform = Compose([to_image, transform]) if transform else to_image
         super().__init__(os.path.join(root, 'UCF-101'),
                          os.path.join(root, 'ucfTrainTestlist'),
                          frames_per_clip=1,
+                         train=(split == 'train'),
                          transform=transform,
                          num_workers=os.cpu_count(),
-                         output_format='TCHW',
-                         **kwargs)
+                         output_format='TCHW')
         self.clip_len = [
             len(x) for x in self.video_clips.metadata['video_pts']]
         self.clip_start_index = [
@@ -45,13 +50,12 @@ class UCF101MidFrames(UCF101):
         return image, label
 
 
-def build_datasets(
+def get_datasets(
     name: str,
     train_transform=None,
     test_transform=None,
 ) -> dict:
-    # get environment variable
-    root = os.environ['TORCHVISION_DATASETS']
+    root = os.path.join(os.environ['TORCHVISION_DATASETS'], name)
 
     cls = {
         "ImageNet": ImageNet,
@@ -61,18 +65,17 @@ def build_datasets(
         "FGVCAircraft": FGVCAircraft,
         "Flowers102": Flowers102,
         "Food101": Food101,
-        "OxfordPets": OxfordIIITPet,
+        "OxfordIIITPet": OxfordIIITPet,
         "StanfordCars": StanfordCars,
         "SUN397": SUN397,
         "UCF101": UCF101MidFrames,
     }[name]
 
     if name == 'ImageNet':
-        root = os.path.join(root, 'imagenet')
         return {
-            'train': cls(root, split='train', transform=train_transform),
-            'val': cls(root, split='val', transform=test_transform),
-            'test': cls(root, split='val', transform=test_transform),
+            'train': cls(root, 'train', transform=train_transform),
+            'val': cls(root, 'val', transform=test_transform),
+            'test': cls(root, 'val', transform=test_transform),
         }
     if name == 'Caltech101':
         return {
@@ -80,9 +83,9 @@ def build_datasets(
         }
     if name == 'DTD':
         return {
-            'train': cls(root, split='train', transform=train_transform),
-            'val': cls(root, split='val', transform=test_transform),
-            'test': cls(root, split='test', transform=test_transform),
+            'train': cls(root, 'train', transform=train_transform),
+            'val': cls(root, 'val', transform=test_transform),
+            'test': cls(root, 'test', transform=test_transform),
         }
     if name == 'EuroSAT':
         return {
@@ -90,40 +93,38 @@ def build_datasets(
         }
     if name == 'FGVCAircraft':
         return {
-            'train': cls(root, split='train', transform=train_transform),
-            'val': cls(root, split='val', transform=test_transform),
-            'test': cls(root, split='test', transform=test_transform),
+            'train': cls(root, 'train', transform=train_transform),
+            'val': cls(root, 'val', transform=test_transform),
+            'test': cls(root, 'test', transform=test_transform),
         }
     if name == 'Flowers102':
         return {
-            'train': cls(root, split='train', transform=train_transform),
-            'val': cls(root, split='val', transform=test_transform),
-            'test': cls(root, split='test', transform=test_transform),
+            'train': cls(root, 'train', transform=train_transform),
+            'val': cls(root, 'val', transform=test_transform),
+            'test': cls(root, 'test', transform=test_transform),
         }
     if name == 'Food101':
         return {
-            'train': cls(root, split='train', transform=train_transform),
-            'test': cls(root, split='test', transform=test_transform),
+            'train': cls(root, 'train', transform=train_transform),
+            'test': cls(root, 'test', transform=test_transform),
         }
-    if name == 'OxfordPets':
+    if name == 'OxfordIIITPet':
         return {
-            'train': cls(root, split='trainval', transform=train_transform),
-            'test': cls(root, split='test', transform=test_transform)
+            'train': cls(root, 'trainval', transform=train_transform),
+            'test': cls(root, 'test', transform=test_transform)
         }
     if name == 'StanfordCars':
         return {
-            'train': cls(root, split='train', transform=train_transform),
-            'test': cls(root, split='test', transform=test_transform),
+            'train': cls(root, 'train', transform=train_transform),
+            'test': cls(root, 'test', transform=test_transform),
         }
     if name == 'SUN397':
-        root = os.path.join(root, 'SUN397')
         return {
             'test': cls(root, transform=test_transform),
         }
     if name == 'UCF101':
-        root = os.path.join(root, 'ucf-101')
         return {
-            'train': cls(root, train=True, transform=train_transform),
-            'test': cls(root, train=False, transform=test_transform),
+            'train': cls(root, 'train', transform=train_transform),
+            'test': cls(root, 'test', transform=test_transform),
         }
     raise NotImplementedError(name)

@@ -1,5 +1,5 @@
-from .torchvision import build_datasets as get_torchvision_datasets
-from .coop import build_datasets as get_coop_datasets
+from .torchvision import get_datasets as get_torchvision_datasets
+from .coop.coop import get_datasets as get_coop_datasets
 
 
 def get_datasets(

@@ -1,6 +1,14 @@
-def test_torchvision_datasets():
-    from zsfs.datasets.torchvision import build_datasets
+def get_size_of_torchvision_datasets(name):
+    from zsfs.datasets.torchvision import get_datasets
+    return {k: len(v) for k, v in get_datasets(name).items()}
 
+
+def get_size_of_coop_datasets(name):
+    from zsfs.datasets.coop import get_datasets
+    return {k: len(v) for k, v in get_datasets(name).items()}
+
+
+if __name__ == '__main__':
     names = [
         'ImageNet',
         'Caltech101',
@@ -9,44 +17,15 @@ def test_torchvision_datasets():
         'FGVCAircraft',
         'Flowers102',
         'Food101',
-        'OxfordPets',
+        'OxfordIIITPet',
         'StanfordCars',
         'SUN397',
         'UCF101',
     ]
-
-    print('-',  'torchvision')
     for name in names:
-        datasets = build_datasets(name)
-        print('--', name)
-        for k, v in datasets.items():
-            print('---', k, ':', len(v))
-
-
-def test_coop_datasets():
-    from zsfs.datasets.coop import build_datasets
-
-    names = [
-        'Caltech101',
-        'DTD',
-        'EuroSAT',
-        'FGVCAircraft',
-        'Flowers102',
-        'Food101',
-        'OxfordPets',
-        'StanfordCars',
-        'SUN397',
-        'UCF101',
-    ]
-
-    print('-',  'CoOp')
-    for name in names:
-        datasets = build_datasets(name)
-        print('--', name)
-        for k, v in datasets.items():
-            print('---', k, ':', len(v))
-
-
-if __name__ == '__main__':
-    test_torchvision_datasets()
-    test_coop_datasets()
+        print(name)
+        tv = get_size_of_torchvision_datasets(name)
+        co = get_size_of_coop_datasets(name)
+        print('torchvision:', sum(tv.values()), tv)
+        print('coop:', sum(co.values()), co)
+        print()
