@@ -1,32 +1,17 @@
-import os
-import hashlib
 import torch
 from clip.model import CLIP
 from clip import tokenize
 
-
-def encode_texts(model: CLIP, texts: list[str]):
-    x = tokenize(texts).cuda()
+@torch.no_grad()
+def encode_texts(model: CLIP, texts: list[str], device: str = 'cuda'):
+    x = tokenize(texts).to(device)
     x = model.encode_text(x)
     x = torch.nn.functional.normalize(x)
     return x
 
 
-def encode_texts_cached(model: CLIP, texts: list[str], cache_dir: str):
-    hash = hashlib.md5((str(model) + '\n' + str(texts)).encode()).hexdigest()
-    cache = os.path.join(cache_dir, hash) + '.pt'
-    if not os.path.isfile(cache):
-        x = encode_texts(model, texts)
-        torch.save(x, cache)
-    return torch.load(cache)
-
-
-def encode_prompts(
-    model: CLIP,
-    prompts: list[list[str]],
-    cache_dir: str = '.cache',
-):
-    return [encode_texts_cached(model, x, cache_dir) for x in prompts]
+def encode_prompts(model: CLIP, prompts: list[list[str]], device: str = 'cuda'):
+    return [encode_texts(model, x, device) for x in prompts]
 
 
 class MeanEnsembler(torch.nn.Linear):
