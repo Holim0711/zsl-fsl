@@ -40,8 +40,9 @@ def _train_transform(n_px: int):
     ])
 
 
-def load_clip_fp32(name: str):
+def load_clip(name: str, fp32: bool = False):
     model, val_preprocess = clip.load(name)
     train_preprocess = _train_transform(model.visual.input_resolution)
-    model.apply(_convert_weights_to_fp32)
+    if fp32:
+        model.apply(_convert_weights_to_fp32)
     return model, train_preprocess, val_preprocess

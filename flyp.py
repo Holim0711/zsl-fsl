@@ -6,7 +6,7 @@ from torch.utils.data import Dataset, DataLoader
 import clip
 from clip.model import CLIP
 from tqdm import tqdm
-from utils import encode_prompts, MeanEnsembler, load_clip_fp32
+from utils import encode_prompts, MeanEnsembler, load_clip
 from zsfs.datasets import get_datasets
 from zsfs.prompts import get_prompts
 import torch.nn as nn
@@ -82,18 +82,17 @@ class FLYPDataset(Dataset):
 if __name__ == "__main__":
     method_name = sys.argv[1] if len(sys.argv) > 1 else 'CLIP'
     model_name = sys.argv[2] if len(sys.argv) > 2 else 'RN50'
-    dataset_module = sys.argv[3] if len(sys.argv) > 3 else 'CoOp'
-    dataset_name = sys.argv[4] if len(sys.argv) > 4 else 'Caltech101'
+    dataset_name = sys.argv[3] if len(sys.argv) > 3 else 'Caltech101'
     batch_size = 64
 
     # load model & transforms
-    model, train_preprocess, val_preprocess = load_clip_fp32(model_name)
+    model, train_preprocess, val_preprocess = load_clip(model_name, fp32=False)
 
     # load prompts
-    prompts = get_prompts(method_name, dataset_module, dataset_name)
+    prompts = get_prompts(method_name, dataset_name)
 
     # load datasets
-    datasets = get_datasets(dataset_module, dataset_name, train_preprocess, val_preprocess)
+    datasets = get_datasets(dataset_name, train_preprocess, val_preprocess)
     train_dataset = FLYPDataset(datasets['train'], prompts)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True, drop_last=True)
     val_loader = DataLoader(datasets['val'], batch_size=batch_size, num_workers=os.cpu_count(), pin_memory=True)
@@ -103,6 +102,7 @@ if __name__ == "__main__":
     zeroshot_classifier = MeanEnsembler(encode_prompts(model, prompts))
     acc = run_test(test_loader, model, zeroshot_classifier)
     print(method_name, model_name, dataset_name, acc, sep='\t', flush=True)
+    print(model.logit_scale.exp().item())
 
     # train
     model = run_train(model, train_loader, val_loader)
@@ -111,3 +111,4 @@ if __name__ == "__main__":
     zeroshot_classifier = MeanEnsembler(encode_prompts(model, prompts))
     acc = run_test(test_loader, model, zeroshot_classifier)
     print(method_name, model_name, dataset_name, acc, sep='\t', flush=True)
+    print(model.logit_scale.exp().item())
