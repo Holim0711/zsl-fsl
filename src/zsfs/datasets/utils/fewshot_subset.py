@@ -39,11 +39,21 @@ class FewShotSubset(Subset):
         dataset: Dataset,
         k_shots: int,
         random_seed: Optional[int] = None,
+        oversampling: bool = False,
     ):
+        self.k_shots = k_shots
+        self.random = Random(random_seed)
+        self.oversampling = oversampling
         targets = get_targets(dataset)
         index_lists = [[] for _ in range(max(targets) + 1)]
         [index_lists[y].append(i) for i, y in enumerate(targets)]
-        rand = Random(random_seed)
-        index_lists = [rand.sample(x, k_shots) for x in index_lists]
+        index_lists = [self.sample_k_shots(x) for x in index_lists]
         super().__init__(dataset, sum(index_lists, []))
         self.targets = [targets[i] for i in self.indices]
+
+    def sample_k_shots(self, x: list[int]):
+        if len(x) < self.k_shots and self.oversampling:
+            m = self.k_shots // len(x)
+            r = self.k_shots % len(x)
+            return x * m + self.random.sample(x, r)
+        return self.random.sample(x, self.k_shots)
