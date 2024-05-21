@@ -157,6 +157,5 @@ if __name__ == "__main__":
     )
 
     # run test
-    zeroshot_classifier = MeanEnsembler(encode_prompts(model, prompts))
-    acc = run_test(test_loader, model, zeroshot_classifier)
+    acc = run_test(model, test_loader, prompts)
     print(method_name, model_name, dataset_name, total_epochs, warmup_epochs, lr, wd, batch_size, acc, sep='\t', flush=True)
