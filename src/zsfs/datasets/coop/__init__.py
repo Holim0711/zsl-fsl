@@ -1,1 +1,1 @@
-from .coop import get_datasets
+from .coop import get_datasets, get_fewshot_datasets

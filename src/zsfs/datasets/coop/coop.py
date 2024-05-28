@@ -1,10 +1,13 @@
 import os
 import json
+import random
+from collections import defaultdict
 from typing import Optional, Callable
 from importlib import resources as impresources
 from PIL import Image
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, Subset
 from torchvision.datasets import ImageNet, FGVCAircraft
+from ..utils import get_targets
 
 
 DATAPATHS = {
@@ -105,3 +108,33 @@ def get_datasets(
             'val': CoOpDataset(root, splits['val'], test_transform),
             'test': CoOpDataset(root, splits['test'], test_transform),
         }
+
+
+def sample_indices(dataset: Dataset, shot: int, rand: random.Random):
+    indices = defaultdict(list)
+    for i, y in enumerate(get_targets(dataset)):
+        indices[y].append(i)
+    return [i for v in indices.values() for i in rand.sample(v, shot)]
+
+
+def sample_fewshot_indices(train: Dataset, val: Dataset, shot: int, seed: int):
+    rand = random.Random(seed)
+    train_indices = sample_indices(train, shot, rand)
+    val_indices = sample_indices(val, min(shot, 4), rand)
+    return {'train': train_indices, 'val': val_indices}
+
+
+def get_fewshot_datasets(
+    name: str,
+    train_transform: Optional[Callable] = None,
+    test_transform: Optional[Callable] = None,
+    shot: int = 1,
+    seed: int = 1,
+):
+    datasets = get_datasets(name, train_transform, test_transform)
+    indices = sample_fewshot_indices(datasets['train'], datasets['val'], shot, seed)
+    return {
+        'train': Subset(datasets['train'], indices['train']),
+        'val': Subset(datasets['val'], indices['val']),
+        'test': datasets['test'],
+    }

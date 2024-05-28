@@ -7,28 +7,30 @@ from collections.abc import Iterable
 
 
 def get_targets(dataset: Dataset):
+    # get targets from dataset
     targets = dataset.__dict__.get('targets')
-
     if not targets:
         targets = dataset.__dict__.get('labels')
+    if not targets:
+        targets = dataset.__dict__.get('_labels')
+    if not targets:
+        data = dataset.__dict__.get('data')
+        if isinstance(data, Iterable):
+            if all(isinstance(x, Iterable) and len(x) == 2 for x in data):
+                targets = [y for _, y in data]
 
+    # convert targets to list[int]
     if isinstance(targets, torch.Tensor):
         targets = dataset.targets.tolist()
     elif isinstance(targets, numpy.ndarray):
         targets = dataset.targets.tolist()
 
-    data = dataset.__dict__.get('data')
+    # return if targets is list[int]
+    if isinstance(targets, Iterable):
+        if all(isinstance(x, int) for x in targets):
+            return targets
 
-    if isinstance(data, Iterable) and all(
-        isinstance(x, Iterable) and len(x) == 2 for x in data
-    ):
-        targets = [y for _, y in data]
-
-    if isinstance(targets, Iterable) and all(
-        isinstance(x, int) for x in targets
-    ):
-        return targets
-
+    # else, default method
     return [y for _, y in dataset]
 
 
